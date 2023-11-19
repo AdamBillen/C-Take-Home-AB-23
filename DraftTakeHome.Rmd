@@ -1,0 +1,60 @@
+---
+title: "Clarity Take Home"
+author: "Adam Billen"
+date: "11/16/2023"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dplyr)
+library(readr)
+library(coefplot)
+
+library(dbplyr)
+library(tidyr)
+library(ggplot2)
+library(tidyverse)
+```
+
+```{r}
+#Just checking to see how the data is formatted
+read_lines('./CCL_2023_assessment_data/data/demographics.txt', n_max = 6)
+read_lines('./CCL_2023_assessment_data/data/projections.txt', n_max = 6)
+read_lines('./CCL_2023_assessment_data/data/results.txt', n_max = 6)
+read_lines('./CCL_2023_assessment_data/data/geoid_key.txt', n_max = 6)
+
+#Reading into a tibble using tsv w/ a relative path
+demographics <- read_tsv("./CCL_2023_assessment_data/data/demographics.txt")
+projections <- read_tsv("./CCL_2023_assessment_data/data/projections.txt")
+results <- read_tsv("./CCL_2023_assessment_data/data/results.txt")
+geoid_key <- read_tsv("./CCL_2023_assessment_data/data/geoid_key.txt")
+
+#Joining demographics/projections/results into one tibble for when a single table is necessary
+combined <- demographics %>%
+  left_join(projections, by = 'geoid') %>%
+  left_join(results, by = 'geoid')
+```
+Some ideas:
+-Maybe pull which townships were off by over a certain % for each vote category
+-Could build a map of which districts were off by how much (maybe teach myself GIS in the process?)
+-Could build a model to predict how far off the predictions are based on xyz demographic variables of a township
+        in order to ID where the weakest projections are
+
+```{r}
+off <- combined %>%
+  group_by(geoid) %>%
+  mutate(mw_off = (mw_yes/(mw_yes + mw_no)) - (proj_mw_yes/proj_votes)) %>%
+  mutate(bg_off = (bg_yes/(bg_yes + bg_no)) - (proj_bg_yes/proj_votes)) %>%
+  mutate(rcv_off = (rcv_yes/(rcv_yes + rcv_no)) - (proj_rcv_yes/proj_votes))
+
+reg1 <- lm(mw_off~share_dem + share_rep, data = off)
+
+summary(reg1)
+coefplot(reg1, title = "DemRep", xlab = "DemRep", intercept = FALSE)
+confint(reg1)
+```
+
