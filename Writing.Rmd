@@ -155,37 +155,38 @@ off_reg <- off %>%
 reg_proj_mw <- lm(prop_proj_mw~share_dem + share_rep + share_white + share_afam + share_female + avg_hhincome + avg_popdens + avg_partyscore + avg_collegescore + avg_gunownscore + avg_gvpscore + avg_churchscore + avg_marijuanascore + avg_fiscalprogscore + avg_choicescore + avg_enviroscore, data = off_reg)
 
 summary(reg_proj_mw) 
-coefplot(reg_proj_mw, title = "DemRep", xlab = "DemRep", intercept = FALSE)
+coefplot(reg_proj_mw, title = "reg_proj_mw", intercept = FALSE)
 confint(reg_proj_mw)
 
 reg_proj_bg <- lm(bg_off~share_dem + share_rep + share_white + share_afam + share_female + avg_hhincome + avg_popdens + avg_partyscore + avg_collegescore + avg_gunownscore + avg_gvpscore + avg_churchscore + avg_marijuanascore + avg_fiscalprogscore + avg_choicescore + avg_enviroscore, data = off_reg)
 
 summary(reg_proj_bg)
-coefplot(reg_proj_bg, title = "DemRep", xlab = "DemRep", intercept = FALSE)
+coefplot(reg_proj_bg, title = "reg_proj_bg", intercept = FALSE)
 confint(reg_proj_bg)
 
 reg_proj_rcv <- lm(rcv_off~share_dem + share_rep + share_white + share_afam + share_female + avg_hhincome + avg_popdens + avg_partyscore + avg_collegescore + avg_gunownscore + avg_gvpscore + avg_churchscore + avg_marijuanascore + avg_fiscalprogscore + avg_choicescore + avg_enviroscore, data = off_reg)
 
 summary(reg_proj_rcv)
-coefplot(reg_proj_rcv, title = "DemRep", xlab = "DemRep", intercept = FALSE)
+coefplot(reg_proj_rcv, title = "reg_proj_rcv", intercept = FALSE)
 confint(reg_proj_rcv)
 
 reg_mw <- lm(mw_off~share_dem + share_rep + share_white + share_afam + share_female + avg_hhincome + avg_popdens + avg_partyscore + avg_collegescore + avg_gunownscore + avg_gvpscore + avg_churchscore + avg_marijuanascore + avg_fiscalprogscore + avg_choicescore + avg_enviroscore, data = off_reg)
 
 summary(reg_mw) 
-coefplot(reg_mw, title = "DemRep", xlab = "DemRep", intercept = FALSE)
+coefplot(reg_mw, title = "reg_mw", intercept = FALSE)
 confint(reg_mw)
 
 reg_bg <- lm(bg_off~share_dem + share_rep + share_white + share_afam + share_female + avg_hhincome + avg_popdens + avg_partyscore + avg_collegescore + avg_gunownscore + avg_gvpscore + avg_churchscore + avg_marijuanascore + avg_fiscalprogscore + avg_choicescore + avg_enviroscore, data = off_reg)
 
 summary(reg_bg)
-coefplot(reg_bg, title = "DemRep", xlab = "DemRep", intercept = FALSE)
+coefplot(reg_bg, title = "reg_bg", intercept = FALSE)
 confint(reg_bg)
 
 reg_rcv <- lm(rcv_off~share_dem + share_rep + share_white + share_afam + share_female + avg_hhincome + avg_popdens + avg_partyscore + avg_collegescore + avg_gunownscore + avg_gvpscore + avg_churchscore + avg_marijuanascore + avg_fiscalprogscore + avg_choicescore + avg_enviroscore, data = off_reg)
 
 summary(reg_rcv)
-coefplot(reg_rcv, title = "DemRep", xlab = "DemRep", intercept = FALSE)
+coefplot(reg_rcv, title = "reg_rcv", intercept = FALSE)
 confint(reg_rcv)
 ```
+
 

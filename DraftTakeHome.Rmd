@@ -84,19 +84,12 @@ ggplot(data = off, mapping = aes(x = share_white, y = rcv_off)) +
   geom_smooth()
 ```
 ```{r}
-off <- combined %>%
-  group_by(geoid) %>%
-  mutate(mw_off = (mw_yes/(mw_yes + mw_no)) - (proj_mw_yes/proj_votes)) %>%
-  mutate(bg_off = (bg_yes/(bg_yes + bg_no)) - (proj_bg_yes/proj_votes)) %>%
-  mutate(rcv_off = (rcv_yes/(rcv_yes + rcv_no)) - (proj_rcv_yes/proj_votes)) %>%
-  mutate(mw_chunks = cut(mw_off, 5))
+# off <- off %>%
+#   group_by(geoid) %>%
+#   mutate(mw_off = (mw_yes/(mw_yes + mw_no)) - (proj_mw_yes/proj_votes)) %>%
+#   mutate(bg_off = (bg_yes/(bg_yes + bg_no)) - (proj_bg_yes/proj_votes)) %>%
+#   mutate(rcv_off = (rcv_yes/(rcv_yes + rcv_no)) - (proj_rcv_yes/proj_votes))
 
-off$chunks <- cut(off$mw_off, breaks = seq(min(off$mw_off), max(off$mw_off), by = .2))
-
-bands <- seq(0, 1, by = .2)
-ggplot(data = off, aes(x = mw_off)) +
-  geom_ribbon(aes(ymin = y - 10, ymax = y + 10), alpha = 0.2)
-  facet_wrap(~share_dem)
 
 off$share_dem_cat <- cut(off$share_dem, breaks = c(0, .2, .4, .6, .8, 1), labels = c("Very low dem_share", "Low dem_share", "Medium dem_share", "High dem_share", "Very high dem_share"))
 

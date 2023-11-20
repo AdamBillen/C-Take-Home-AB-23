@@ -1,7 +1,0 @@
-"0",""
-"0",""
-"0","off$share_wh_cat <- cut(off$share_white, breaks = c(0, .2, .4, .6, .8, 1), labels = c(""Very low share_white"", ""Low share_white"", ""Medium share_white"", ""High share_white"", ""Very high share_white""))"
-"0",""
-"0","ggplot(data = off, aes(x = mw_off)) +"
-"0","  geom_histogram() +"
-"0","  facet_wrap(~share_wh_cat)"

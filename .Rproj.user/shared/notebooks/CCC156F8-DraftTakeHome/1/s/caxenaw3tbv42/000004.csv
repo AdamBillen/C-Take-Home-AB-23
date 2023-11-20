@@ -1,5 +1,48 @@
-"0","library(coefplot)
+"0","library(dplyr)"
+"2","
+Attaching package: ‘dplyr’
+
 "
+"2","The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+"
+"2","The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+"
+"0","library(readr)"
+"0","library(coefplot)"
 "2","package ‘coefplot’ was built under R version 4.3.2"
 "2","Loading required package: ggplot2
 "
+"0","library(dbplyr)"
+"2","Registered S3 methods overwritten by 'dbplyr':
+  method         from
+  print.tbl_lazy     
+  print.tbl_sql      
+"
+"2","
+Attaching package: ‘dbplyr’
+
+"
+"2","The following objects are masked from ‘package:dplyr’:
+
+    ident, sql
+
+"
+"0","library(tidyr)"
+"0","library(ggplot2)"
+"0","library(tidyverse)"
+"2","-- [1mAttaching core tidyverse packages[22m ----------------------------------------------------------------------------------------------------------- tidyverse 2.0.0 --
+[32mv[39m [34mforcats  [39m 1.0.0     [32mv[39m [34mstringr  [39m 1.5.0
+[32mv[39m [34mlubridate[39m 1.9.2     [32mv[39m [34mtibble   [39m 3.2.1
+[32mv[39m [34mpurrr    [39m 1.0.2     "
+"2","-- [1mConflicts[22m ----------------------------------------------------------------------------------------------------------------------------- tidyverse_conflicts() --
+[31mx[39m [34mdplyr[39m::[32mfilter()[39m masks [34mstats[39m::filter()
+[31mx[39m [34mdbplyr[39m::[32mident()[39m masks [34mdplyr[39m::ident()
+[31mx[39m [34mdplyr[39m::[32mlag()[39m    masks [34mstats[39m::lag()
+[31mx[39m [34mdbplyr[39m::[32msql()[39m   masks [34mdplyr[39m::sql()
+[36mi[39m Use the conflicted package ([3m[34m<http://conflicted.r-lib.org/>[39m[23m) to force all conflicts to become errors"
