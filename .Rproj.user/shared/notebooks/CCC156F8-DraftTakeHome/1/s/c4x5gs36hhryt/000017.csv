@@ -1,0 +1,14 @@
+"0","off <- combined %>%
+  group_by(geoid) %>%
+  mutate(mw_off = (mw_yes/(mw_yes + mw_no)) - (proj_mw_yes/proj_votes)) %>%
+  mutate(bg_off = (bg_yes/(bg_yes + bg_no)) - (proj_bg_yes/proj_votes)) %>%
+  mutate(rcv_off = (rcv_yes/(rcv_yes + rcv_no)) - (proj_rcv_yes/proj_votes)) %>%
+  mutate(win_actual_mw = (mw_yes/(mw_yes + mw_no)) > .5) %>%
+  mutate(win_pred_mw = ifelse(((proj_mw_yes/proj_votes) > .5), 'Win', 'Fail')) %>%
+  mutate(win_actual_bg = (bg_yes/(bg_yes + bg_no)) > .5) %>%
+  mutate(win_pred_bg = (proj_bg_yes/proj_votes) > .5) %>%
+  mutate(win_actual_rcv = (rcv_yes/(rcv_yes + rcv_no)) > .5) %>%
+  mutate(win_pred_rcv = (proj_rcv_yes/proj_votes) > .5)
+"
+"2","Error: object 'rcv_yes' not found
+"

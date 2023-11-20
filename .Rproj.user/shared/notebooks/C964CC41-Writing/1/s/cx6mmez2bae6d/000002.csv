@@ -1,0 +1,19 @@
+"0","mw_correct <- sum((off$win_pred_mw == ""Win"" & off$win_actual_mw == ""Win"") | (off$win_pred_mw == ""Fail"" & off$win_actual_mw == ""Fail""), na.rm = TRUE)
+bg_correct <- sum((off$win_pred_bg == ""Win"" & off$win_actual_bg == ""Win"") | (off$win_pred_bg == ""Fail"" & off$win_actual_bg == ""Fail""), na.rm = TRUE)
+rcv_correct <- sum((off$win_pred_rcv == ""Win"" & off$win_actual_rcv == ""Win"") | (off$win_pred_rcv == ""Fail"" & off$win_actual_rcv == ""Fail""), na.rm = TRUE)
+print(mw_correct)
+"
+"1","[1]"
+"1"," 267"
+"1","
+"
+"0","print(bg_correct)"
+"1","[1]"
+"1"," 369"
+"1","
+"
+"0","print(rcv_correct)"
+"1","[1]"
+"1"," 178"
+"1","
+"

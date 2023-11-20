@@ -1,0 +1,32 @@
+{
+    "id": "7F731F6F",
+    "path": null,
+    "project_path": null,
+    "type": "r_dataframe",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1700447858538.0,
+    "source_on_save": false,
+    "relative_order": 6,
+    "properties": {
+        "expression": "geoid_key",
+        "caption": "geoid_key",
+        "totalObservations": 504,
+        "displayedObservations": 504,
+        "variables": 3,
+        "cacheKey": "638A4A42",
+        "object": "geoid_key",
+        "environment": "",
+        "contentUrl": "grid_resource/gridviewer.html?env=&obj=geoid_key&cache_key=638A4A42&max_cols=50",
+        "preview": 0
+    },
+    "folds": "",
+    "lastKnownWriteTime": 2110789212816,
+    "encoding": "",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1700447858538,
+    "read_only": false,
+    "read_only_alternatives": []
+}

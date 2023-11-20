@@ -1,0 +1,6 @@
+"0",""
+"0","off$share_rep_cat <- cut(off$share_rep, breaks = c(0, .2, .4, .6, .8, 1), labels = c(""Very low share_rep"", ""Low share_rep"", ""Medium share_rep"", ""High share_rep"", ""Very high share_rep""))"
+"0",""
+"0","ggplot(data = off, aes(x = mw_off)) +"
+"0","  geom_histogram() +"
+"0","  facet_wrap(~share_rep_cat)"

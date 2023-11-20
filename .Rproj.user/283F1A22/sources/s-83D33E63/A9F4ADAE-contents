@@ -43,38 +43,95 @@ Some ideas:
 -Could build a map of which districts were off by how much (maybe teach myself GIS in the process?)
 -Could build a model to predict how far off the predictions are based on xyz demographic variables of a township
         in order to ID where the weakest projections are
-
 ```{r}
 off <- combined %>%
   group_by(geoid) %>%
   mutate(mw_off = (mw_yes/(mw_yes + mw_no)) - (proj_mw_yes/proj_votes)) %>%
   mutate(bg_off = (bg_yes/(bg_yes + bg_no)) - (proj_bg_yes/proj_votes)) %>%
-  mutate(rcv_off = (rcv_yes/(rcv_yes + rcv_no)) - (proj_rcv_yes/proj_votes))
+  mutate(rcv_off = (rcv_yes/(rcv_yes + rcv_no)) - (proj_rcv_yes/proj_votes)) %>%
+  mutate(win_actual_mw = ifelse(((mw_yes/(mw_yes + mw_no)) > .5), "Win", "Fail")) %>%
+  mutate(win_pred_mw = ifelse(((proj_mw_yes/proj_votes) > .5), 'Win', 'Fail')) %>%
+  mutate(win_actual_bg = ifelse(((bg_yes/(bg_yes + bg_no)) > .5), "Win", "Fail")) %>%
+  mutate(win_pred_bg = ifelse(((proj_bg_yes/proj_votes) > .5), "Win", "Fail")) %>%
+  mutate(win_actual_rcv = ifelse(((rcv_yes/(rcv_yes + rcv_no)) > .5), "Win", "Fail")) %>%
+  mutate(win_pred_rcv = ifelse(((proj_rcv_yes/proj_votes) > .5), "Win", "Fail"))
 
-reg1 <- lm(mw_off~share_dem + share_rep, data = off)
+sum((off$win_pred_mw == "Win" & off$win_actual_mw == "Win") | (off$win_pred_mw == "Fail" & off$win_actual_mw == "Fail"), na.rm = TRUE)
+
+sum((off$win_pred_bg == "Win" & off$win_actual_bg == "Win") | (off$win_pred_bg == "Fail" & off$win_actual_bg == "Fail"), na.rm = TRUE)
+
+sum((off$win_pred_rcv == "Win" & off$win_actual_rcv == "Win") | (off$win_pred_rcv == "Fail" & off$win_actual_rcv == "Fail"), na.rm = TRUE)
+```
+
+```{r}
+reg1 <- lm(mw_off~share_dem + share_rep + share_white + share_afam + share_female + avg_hhincome + avg_popdens + avg_partyscore + avg_collegescore + avg_gunownscore + avg_gvpscore + avg_churchscore + avg_marijuanascore + avg_fiscalprogscore + avg_choicescore + avg_enviroscore, data = off)
 
 summary(reg1)
 coefplot(reg1, title = "DemRep", xlab = "DemRep", intercept = FALSE)
 confint(reg1)
 ```
 ```{r}
-ggplot(data = off, mapping = aes(x = share_dem, y = rcv_off)) +
-  geom_smooth()
-
-ggplot(data = off, mapping = aes(x = share_dem, y = bg_off)) +
-  geom_smooth()
-
 ggplot(data = off, mapping = aes(x = share_dem, y = mw_off)) +
-  geom_smooth()
-
-ggplot(data = off, mapping = aes(x = share_rep, y = rcv_off)) +
-  geom_smooth()
-
-ggplot(data = off, mapping = aes(x = share_rep, y = bg_off)) +
   geom_smooth()
 
 ggplot(data = off, mapping = aes(x = share_rep, y = mw_off)) +
   geom_smooth()
+
+ggplot(data = off, mapping = aes(x = share_afam, y = rcv_off)) +
+  geom_smooth()
+
+ggplot(data = off, mapping = aes(x = share_white, y = rcv_off)) +
+  geom_smooth()
 ```
+```{r}
+off <- combined %>%
+  group_by(geoid) %>%
+  mutate(mw_off = (mw_yes/(mw_yes + mw_no)) - (proj_mw_yes/proj_votes)) %>%
+  mutate(bg_off = (bg_yes/(bg_yes + bg_no)) - (proj_bg_yes/proj_votes)) %>%
+  mutate(rcv_off = (rcv_yes/(rcv_yes + rcv_no)) - (proj_rcv_yes/proj_votes)) %>%
+  mutate(mw_chunks = cut(mw_off, 5))
+
+off$chunks <- cut(off$mw_off, breaks = seq(min(off$mw_off), max(off$mw_off), by = .2))
+
+bands <- seq(0, 1, by = .2)
+ggplot(data = off, aes(x = mw_off)) +
+  geom_ribbon(aes(ymin = y - 10, ymax = y + 10), alpha = 0.2)
+  facet_wrap(~share_dem)
+
+off$share_dem_cat <- cut(off$share_dem, breaks = c(0, .2, .4, .6, .8, 1), labels = c("Very low dem_share", "Low dem_share", "Medium dem_share", "High dem_share", "Very high dem_share"))
+
+ggplot(data = off, aes(x = mw_off)) +
+  geom_histogram() +
+  facet_wrap(~share_dem_cat)
+
+ggplot(data = off, aes(x = bg_off)) +
+  geom_histogram() +
+  facet_wrap(~share_dem_cat)
+
+ggplot(data = off, aes(x = rcv_off)) +
+  geom_histogram() +
+  facet_wrap(~share_dem_cat)
+
+off$share_rep_cat <- cut(off$share_rep, breaks = c(0, .2, .4, .6, .8, 1), labels = c("Very low rep_share", "Low rep_share", "Medium rep_share", "High rep share", "Very high rep_share"))
+
+ggplot(data = off, aes(x = mw_off)) +
+  geom_histogram() +
+  facet_wrap(~share_rep_cat)
+
+ggplot(data = off, aes(x = bg_off)) +
+  geom_histogram() +
+  facet_wrap(~share_rep_cat)
+
+ggplot(data = off, aes(x = rcv_off)) +
+  geom_histogram() +
+  facet_wrap(~share_rep_cat)
+```
+
+```{r}
+off %>%
+  length(mw_off[mw_off>1])
+```
+
+
 
 

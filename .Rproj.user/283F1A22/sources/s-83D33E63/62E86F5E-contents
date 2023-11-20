@@ -1,0 +1,191 @@
+---
+title: "Writing"
+author: "Adam Billen"
+date: "11/19/2023"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Model's Peformance
+To start, I was interested in how many of the counties Clarity's model correctly predicted.
+```{r}
+mw_correct <- sum((off$win_pred_mw == "Win" & off$win_actual_mw == "Win") | (off$win_pred_mw == "Fail" & off$win_actual_mw == "Fail"), na.rm = TRUE)
+bg_correct <- sum((off$win_pred_bg == "Win" & off$win_actual_bg == "Win") | (off$win_pred_bg == "Fail" & off$win_actual_bg == "Fail"), na.rm = TRUE)
+rcv_correct <- sum((off$win_pred_rcv == "Win" & off$win_actual_rcv == "Win") | (off$win_pred_rcv == "Fail" & off$win_actual_rcv == "Fail"), na.rm = TRUE)
+print(mw_correct)
+print(bg_correct)
+print(rcv_correct)
+```
+Clarity predicted 267/493 townships correctly for the marijuana legalization measure (~54.2%), 369/493 correctly for the background checks measure (~74.8%), and 178/493 correctly for the ranked choice voting measure (~36.1%). At face value, this is not an excellent performance, but a large number of the townships in Maine are relatively small. I was curious as to whether the model performed better when looking at some of the larger townships in Maine.
+```{r}
+off_large <- off %>%
+  filter(n_registered > 10000)
+  
+mw_correct_large <- sum((off_large$win_pred_mw == "Win" & off_large$win_actual_mw == "Win") | (off_large$win_pred_mw == "Fail" & off_large$win_actual_mw == "Fail"), na.rm = TRUE)
+bg_correct_large <- sum((off_large$win_pred_bg == "Win" & off_large$win_actual_bg == "Win") | (off_large$win_pred_bg == "Fail" & off_large$win_actual_bg == "Fail"), na.rm = TRUE)
+rcv_correct_large <- sum((off_large$win_pred_rcv == "Win" & off_large$win_actual_rcv == "Win") | (off_large$win_pred_rcv == "Fail" & off_large$win_actual_rcv == "Fail"), na.rm = TRUE)
+print(mw_correct_large)
+print(bg_correct_large)
+print(rcv_correct_large)
+```
+Filtering down to townships with a population > 10000, Clarity's model performs much better. For the marijuana and ranked choice voting ballot measure, the model correctly predicts 16/16 townships correctly. For background checks, it predicted 14/16 townships correctly. 
+
+The model's relatively poor performance on the whole still had me curious as to what was causing the issues. To start, I wanted to understand whether the model was generally under or overshooting a township's support for each measure.
+```{r}
+mean(off$mw_off, na.rm = TRUE)
+mean(off$bg_off, na.rm = TRUE)
+mean(off$rcv_off, na.rm = TRUE)
+```
+The model undershot the true support for each ballot measure by nearly 10%! The marijuana legalization measure by ~-9.54%, the background check measure by ~-12.8%, and the ranked choice voting measure by ~-10.57%. Clearly, there are some groups for which the model underestimated support. To get a quick sense of which variables/groups were most predictive of the undershooting, I ran a multivariate regression for each ballot measure. I used the demographic data (minus numbber of registered voters) as my features and the % gap between the projection and actual results for each county as my output. These are very simple multivariate linear regressions, and they do not capture the variation in the data particularly well (R^2s around .5). They can, however, help us understand at a basic level where some of the gaps in prediction vs true results are coming from.
+```{r}
+reg1 <- lm(mw_off~share_dem + share_rep + share_white + share_afam + share_female + avg_hhincome + avg_popdens + avg_partyscore + avg_collegescore + avg_gunownscore + avg_gvpscore + avg_churchscore + avg_marijuanascore + avg_fiscalprogscore + avg_choicescore + avg_enviroscore, data = off)
+
+summary(reg1) 
+coefplot(reg1, title = "DemRep", xlab = "DemRep", intercept = FALSE)
+confint(reg1)
+
+reg2 <- lm(bg_off~share_dem + share_rep + share_white + share_afam + share_female + avg_hhincome + avg_popdens + avg_partyscore + avg_collegescore + avg_gunownscore + avg_gvpscore + avg_churchscore + avg_marijuanascore + avg_fiscalprogscore + avg_choicescore + avg_enviroscore, data = off)
+
+summary(reg2)
+coefplot(reg2, title = "DemRep", xlab = "DemRep", intercept = FALSE)
+confint(reg2)
+
+reg3 <- lm(rcv_off~share_dem + share_rep + share_white + share_afam + share_female + avg_hhincome + avg_popdens + avg_partyscore + avg_collegescore + avg_gunownscore + avg_gvpscore + avg_churchscore + avg_marijuanascore + avg_fiscalprogscore + avg_choicescore + avg_enviroscore, data = off)
+
+summary(reg3)
+coefplot(reg3, title = "DemRep", xlab = "DemRep", intercept = FALSE)
+confint(reg3)
+```
+Looking at the coefficients here, the only variable which has a consistent, significant effect across all three models is the share of Republicans. It has a consistent, negative coefficient in all three regressions, indicating that Clarity's model may have undershot Republican support for the ballot measures. Other variables were more mixed.
+
+The share of female voters has a positive, significant coefficient for the models predicting the gap in support for the background check and ranked choice voting ballot measures, indicating that Clarity's model may have overshot female support for those ballot measures.
+
+The share of white voters had a positive, significant coefficient for the ranked choice voting regression, but a negative coefficient for the background check regression. 
+
+Finally the share of Democratic voters had a positive, significant coefficient for the marijuana legalization measure.
+
+To further explore these relationships, I constructed histograms showing the distribution of demographic data over the errors for each ballot measure. For easier interpretation, I have broken the demographic data into bands where "Very low" is 0-.2 and "Very high" is .8 to 1, with .2 increments in between. Plots are dropped when there is not sufficient data for a given band.
+
+```{r}
+off$share_dem_cat <- cut(off$share_dem, breaks = c(0, .2, .4, .6, .8, 1), labels = c("Very low share_dem", "Low share_dem", "Medium share_dem", "High share_dem", "Very high share_dem"))
+
+ggplot(data = off, aes(x = mw_off)) +
+  geom_histogram() +
+  facet_wrap(~share_dem_cat)
+
+ggplot(data = off, aes(x = bg_off)) +
+  geom_histogram() +
+  facet_wrap(~share_dem_cat)
+
+ggplot(data = off, aes(x = rcv_off)) +
+  geom_histogram() +
+  facet_wrap(~share_dem_cat)
+
+off$share_rep_cat <- cut(off$share_rep, breaks = c(0, .2, .4, .6, .8, 1), labels = c("Very low share_rep", "Low share_rep", "Medium share_rep", "High share_rep", "Very high share_rep"))
+
+ggplot(data = off, aes(x = mw_off)) +
+  geom_histogram() +
+  facet_wrap(~share_rep_cat)
+
+ggplot(data = off, aes(x = bg_off)) +
+  geom_histogram() +
+  facet_wrap(~share_rep_cat)
+
+ggplot(data = off, aes(x = rcv_off)) +
+  geom_histogram() +
+  facet_wrap(~share_rep_cat)
+
+
+off$share_wh_cat <- cut(off$share_white, breaks = c(0, .2, .4, .6, .8, 1), labels = c("Very low share_white", "Low share_white", "Medium share_white", "High share_white", "Very high share_white"))
+
+ggplot(data = off, aes(x = mw_off)) +
+  geom_histogram() +
+  facet_wrap(~share_wh_cat)
+
+ggplot(data = off, aes(x = bg_off)) +
+  geom_histogram() +
+  facet_wrap(~share_wh_cat)
+
+ggplot(data = off, aes(x = rcv_off)) +
+  geom_histogram() +
+  facet_wrap(~share_wh_cat)
+
+off$share_female_cat <- cut(off$share_female, breaks = c(0, .2, .4, .6, .8, 1), labels = c("Very low share_female", "Low share_female", "Medium share_female", "High share_female", "Very high share_female"))
+
+ggplot(data = off, aes(x = mw_off)) +
+  geom_histogram() +
+  facet_wrap(~share_female_cat)
+
+ggplot(data = off, aes(x = bg_off)) +
+  geom_histogram() +
+  facet_wrap(~share_female_cat)
+
+ggplot(data = off, aes(x = rcv_off)) +
+  geom_histogram() +
+  facet_wrap(~share_female_cat)
+```
+We can see through these plots that the distribution of error for townships is centered left of zero, even for those variables which had positive coefficients in their respective regressions. It may be, of course, that when considered in a multivariate regression or other model alongside other coefficients that Clarity's model is overshooting support among some groups. Still, the broader story here is clearly a systematic undershooting of support for the ballot measures across demographic distributions and townships.
+```{r}
+off_mw_correct <- off %>%
+  filter((win_pred_mw == "Win" & win_actual_mw == "Win") | (win_pred_mw == "Fail" & win_actual_mw == "Fail"))
+
+off_bg_correct <- off %>%
+  filter((win_pred_bg == "Win" & win_actual_bg == "Win") | (win_pred_bg == "Fail" & win_actual_bg == "Fail"))
+
+off_rcv_correct <- off %>%
+  filter((win_pred_rcv == "Win" & win_actual_rcv == "Win") | (win_pred_rcv == "Fail" & win_actual_rcv == "Fail"))
+
+mean(off_mw_correct$mw_off)
+mean(off_bg_correct$bg_off)
+mean(off_rcv_correct$rcv_off)
+```
+Even among those townships for which Clarity's model accurately predicted the results of the the ballot measures, the model still undershot actual sort by over 5%. For townships in which Clarity's model accurately predicted the results of the marijuana legalization measure, Clarity's model had an average error of ~-5.5%. For the ranked choice voting measure, Clarity's model had an average error of ~-6.3%. For the background check measure, Clarity's model an average error of about -13.1%, which is slightly higher than its average error for townships as a whole (about -12.8%).
+```{r}
+off_reg <- off %>%
+  mutate(prop_bg = (bg_yes/(bg_yes+bg_no))) %>%
+  mutate(prop_mw = (mw_yes/(mw_yes+mw_no))) %>%
+  mutate(prop_rcv = (rcv_yes/(rcv_yes+rcv_no))) %>%
+  mutate(prop_proj_mw = (proj_mw_yes/proj_votes)) %>%
+  mutate(prop_proj_bg = (proj_bg_yes/proj_votes)) %>%
+  mutate(prop_proj_rcv = (proj_rcv_yes/proj_votes))
+
+
+reg_proj_mw <- lm(prop_proj_mw~share_dem + share_rep + share_white + share_afam + share_female + avg_hhincome + avg_popdens + avg_partyscore + avg_collegescore + avg_gunownscore + avg_gvpscore + avg_churchscore + avg_marijuanascore + avg_fiscalprogscore + avg_choicescore + avg_enviroscore, data = off_reg)
+
+summary(reg_proj_mw) 
+coefplot(reg_proj_mw, title = "DemRep", xlab = "DemRep", intercept = FALSE)
+confint(reg_proj_mw)
+
+reg_proj_bg <- lm(bg_off~share_dem + share_rep + share_white + share_afam + share_female + avg_hhincome + avg_popdens + avg_partyscore + avg_collegescore + avg_gunownscore + avg_gvpscore + avg_churchscore + avg_marijuanascore + avg_fiscalprogscore + avg_choicescore + avg_enviroscore, data = off_reg)
+
+summary(reg_proj_bg)
+coefplot(reg_proj_bg, title = "DemRep", xlab = "DemRep", intercept = FALSE)
+confint(reg_proj_bg)
+
+reg_proj_rcv <- lm(rcv_off~share_dem + share_rep + share_white + share_afam + share_female + avg_hhincome + avg_popdens + avg_partyscore + avg_collegescore + avg_gunownscore + avg_gvpscore + avg_churchscore + avg_marijuanascore + avg_fiscalprogscore + avg_choicescore + avg_enviroscore, data = off_reg)
+
+summary(reg_proj_rcv)
+coefplot(reg_proj_rcv, title = "DemRep", xlab = "DemRep", intercept = FALSE)
+confint(reg_proj_rcv)
+
+reg_mw <- lm(mw_off~share_dem + share_rep + share_white + share_afam + share_female + avg_hhincome + avg_popdens + avg_partyscore + avg_collegescore + avg_gunownscore + avg_gvpscore + avg_churchscore + avg_marijuanascore + avg_fiscalprogscore + avg_choicescore + avg_enviroscore, data = off_reg)
+
+summary(reg_mw) 
+coefplot(reg_mw, title = "DemRep", xlab = "DemRep", intercept = FALSE)
+confint(reg_mw)
+
+reg_bg <- lm(bg_off~share_dem + share_rep + share_white + share_afam + share_female + avg_hhincome + avg_popdens + avg_partyscore + avg_collegescore + avg_gunownscore + avg_gvpscore + avg_churchscore + avg_marijuanascore + avg_fiscalprogscore + avg_choicescore + avg_enviroscore, data = off_reg)
+
+summary(reg_bg)
+coefplot(reg_bg, title = "DemRep", xlab = "DemRep", intercept = FALSE)
+confint(reg_bg)
+
+reg_rcv <- lm(rcv_off~share_dem + share_rep + share_white + share_afam + share_female + avg_hhincome + avg_popdens + avg_partyscore + avg_collegescore + avg_gunownscore + avg_gvpscore + avg_churchscore + avg_marijuanascore + avg_fiscalprogscore + avg_choicescore + avg_enviroscore, data = off_reg)
+
+summary(reg_rcv)
+coefplot(reg_rcv, title = "DemRep", xlab = "DemRep", intercept = FALSE)
+confint(reg_rcv)
+```
+

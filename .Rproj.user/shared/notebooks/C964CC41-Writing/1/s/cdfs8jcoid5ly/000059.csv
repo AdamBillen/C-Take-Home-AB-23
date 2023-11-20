@@ -1,0 +1,5 @@
+"0","off$share_dem_cat <- cut(off$share_dem, breaks = c(0, .2, .4, .6, .8, 1), labels = c(""Very low share_dem"", ""Low share_dem"", ""Medium share_dem"", ""High share_dem"", ""Very high share_dem""))"
+"0",""
+"0","ggplot(data = off, aes(x = mw_off)) +"
+"0","  geom_histogram() +"
+"0","  facet_wrap(~share_dem_cat)"
